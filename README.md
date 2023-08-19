@@ -15,4 +15,5 @@ Dataset available at: https://www.kaggle.com/datasets/binovi/wholesale-customers
 
 Findings & Report: 
 Executive Summary: https://github.com/praveenpkay/Customer-Segmentation-Wholesale-distributor/blob/main/Executive%20Summary.pdf
+
 Technical Document: https://github.com/praveenpkay/Customer-Segmentation-Wholesale-distributor/blob/main/Technical%20Document.pdf
