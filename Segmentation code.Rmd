@@ -1,0 +1,145 @@
+---
+title: "Segmentation group assignment"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+date: "2023-06-30"
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+r <- getOption("repos")
+r["CRAN"] <- "http://cran.cnr.berkeley.edu/"
+options(repos = r)
+
+if(!require(gridExtra)){
+  install.packages("gridExtra")
+}
+
+if(!require(autocrop)){
+  devtools::install_github("jhollist/autocrop")
+}
+
+library("gridExtra")
+library("autocrop")
+
+```
+
+
+## Load library and read file
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+customers = read.csv('/Users/mandy/Desktop/r/HW1/Wholesale customers data.csv',sep = ',')
+```
+
+## Load library and read csv file
+
+```{r}
+library(corrplot)
+options(repos = "https://cran.rstudio.com")
+chooseCRANmirror(ind = 77)
+features = customers[, c("Fresh", "Milk", "Grocery", "Frozen", "Detergents_Paper", "Delicatessen")]
+cor_matrix <- cor(features)
+cor_matrix
+corrplot(cor_matrix, method = "color", type = "upper", tl.cex = 0.7,addCoef.col = "Red")
+```
+
+## Normalize features
+
+```{r}
+normalize = function(x){
+  return ((x - min(x))/(max(x) - min(x)))}
+features_normalized = features %>%
+  mutate(Fresh_n = normalize(Fresh),
+         Milk_n = normalize(Milk),
+         Grocery_n = normalize(Grocery),
+         Frozen_n = normalize(Frozen),
+         Detergents_Paper_n = normalize(Detergents_Paper),
+         Delicatessen_n = normalize(Delicatessen))
+features_normalized = features_normalized[, c("Fresh_n", "Milk_n", "Grocery_n",
+                                              "Frozen_n", "Detergents_Paper_n",
+                                              "Delicatessen_n")]
+```
+
+```{r}
+library(ggplot2)
+head(features_normalized)
+```
+
+## Clustering
+
+```{r}
+library(stats)
+distance_matrix = dist(features_normalized, method = "euclidean")
+hierarchical = hclust(distance_matrix,method = "ward.D")
+features_normalized$cluster = cutree(hierarchical, k=3)
+```
+
+## Dendogram with 3 cut solution
+
+```{r}
+plot(hierarchical, labels = features_normalized$Name)
+rect.hclust(hierarchical, k = 3)
+```
+
+## Cluster centroids
+
+```{r}
+features_normalized %>% group_by(cluster) %>%
+summarise_at(c(1:6), mean)
+```
+
+## Quick plot
+
+```{r}
+ggplot(features_normalized, aes(Grocery_n, Detergents_Paper_n, color = cluster)) + geom_point(size = 4) + labs(color = "Cluster") + theme_minimal()
+```
+
+```{r}
+features$cluster <- as.factor(features_normalized$cluster)
+features_distribution = features %>% group_by(cluster) %>% count(cluster)
+features_distribution
+```
+
+## Export results
+
+```{r}
+write.csv(features, "First three cluster solution v1.csv")
+```
+
+## further filering for cluster 1
+
+```{r}
+data_further = features %>% filter(cluster == 1)
+features_normalized_further = data_further %>%
+  mutate(Fresh_n = normalize(Fresh),
+         Milk_n = normalize(Milk),
+         Grocery_n = normalize(Grocery),
+         Frozen_n = normalize(Frozen),
+         Detergents_Paper_n = normalize(Detergents_Paper),
+         Delicatessen_n = normalize(Delicatessen))
+features_normalized_further = features_normalized_further[, c("Fresh_n", "Milk_n", "Grocery_n",
+                                              "Frozen_n", "Detergents_Paper_n",
+                                              "Delicatessen_n")]
+head(features_normalized_further)
+```
+
+## Further segmenting the majority cluster (cluster 1)
+
+```{r}
+distance_matrix = dist(features_normalized_further, method = "euclidean")
+hierarchical = hclust(distance_matrix,method = "ward.D")
+
+plot(hierarchical, labels = features_normalized_further$Name)
+rect.hclust(hierarchical, k = 3)
+```
+
+```{r}
+features_normalized_further$cluster_further = cutree(hierarchical, k=3)
+data_further$cluster_further <- as.factor(features_normalized_further$cluster)
+features_distribution_further = data_further %>% group_by(cluster_further) %>% count(cluster)
+features_distribution_further
+write.csv(data_further, "Second three cluster solution v2.csv")
+```
+
