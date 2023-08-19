@@ -13,7 +13,6 @@ as well as the client’s annual spending across 6 product categories.
 Resources:
 Dataset available at: https://www.kaggle.com/datasets/binovi/wholesale-customers-data-set
 
-Findings & Report: 
 Executive Summary: https://github.com/praveenpkay/Customer-Segmentation-Wholesale-distributor/blob/main/Executive%20Summary.pdf
 
 Technical Document: https://github.com/praveenpkay/Customer-Segmentation-Wholesale-distributor/blob/main/Technical%20Document.pdf
